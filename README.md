@@ -4,6 +4,13 @@ Scrape hotel search results from Booking.com and export them to CSV for easy com
 
 ---
 
+## 🌐 Live App
+Open in your browser (no setup needed):
+
+https://f373210a41b74675b9df2ff9f27d9185-3d2c1b69-84bf-4fda-8b95-a55470.fly.dev/
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -48,6 +55,8 @@ Then open http://localhost:3000 and:
 - Paste a Booking.com search URL (e.g., a page listing hotels for a destination/date range)
 - Enter a filename (without .csv)
 - Click “Scrape & Download CSV”
+
+Or use the hosted link above.
 
 ### 2) Command Line (interactive)
 Run the script and follow the prompts.
