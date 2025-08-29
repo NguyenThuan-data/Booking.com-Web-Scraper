@@ -1,84 +1,136 @@
-# This app scrape data from booking.com
+# This app scrapes data from booking.com
 
-# import libraries
-import requests
-### This library's job is to act like a web browser. It sends an HTTP 
-### request to a URL and fetches the raw HTML source code of the webpage for you. It's the first step in any web scraping process.
-from bs4 import BeautifulSoup ### This lib having function and features that support web scraping
-### it get the raw html from 'requests' and turn into something structured and searchable/
-import lxml ### act like a high-performance parser for BeautifulSoup
 import csv
 import time
+from typing import List, Dict
+
+import requests
+from bs4 import BeautifulSoup
+
+# Use lxml parser if available via BeautifulSoup
+
+# Default headers to mimic a common browser to reduce basic bot blocks
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/137.0.0.0 Safari/537.36"
+    )
+}
 
 
-def web_scraper(web_url, file_name):
+def fetch_html(web_url: str, timeout: int = 20) -> str:
+    """Fetch page HTML with a desktop-like user agent.
 
-    # Greeting and Add delay
-    print('Hi welcome to the show!\nStart now!')
-    time.sleep(5)
-
-    # add user-browser information, this is the most common browser that users use to access the link
-    header={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'}
-
-    res = requests.get(web_url, headers=header)
+    Raises requests.HTTPError on bad responses.
+    """
+    res = requests.get(web_url, headers=HEADERS, timeout=timeout)
+    res.raise_for_status()
+    return res.text
 
 
-    if res.status_code == 200:### 200 is stadard HTTP status code for 'OK' or 'success'
-        print("Connect to the Website successfully")
-        html_cont = res.text
+def parse_hotels(html: str) -> List[Dict[str, str]]:
+    """Parse hotel cards from Booking search HTML into a list of dict rows.
 
-        # creating soup
-        soup = BeautifulSoup(html_cont, 'lxml')
+    This is best-effort: it tolerates missing elements.
+    """
+    soup = BeautifulSoup(html, "lxml")
 
-        # list of all hotels
-        hotel_divs=soup.find_all('div', role = "listitem")
+    rows: List[Dict[str, str]] = []
 
-        # record scraped information to csv file
-        with open(f'{file_name}.csv','w') as file_csv:
-            writer = csv.writer(file_csv)
+    # Booking uses role=listitem for result cards currently
+    hotel_divs = soup.find_all("div", role="listitem")
 
-            # adding header
-            writer.writerow(['Hotel Name', 'Location', 'Price', 'Rating', 'Score', 'Review','Link'])
+    for hotel in hotel_divs:
+        def safe_text(find_result, default: str = "") -> str:
+            try:
+                if not find_result:
+                    return default
+                text = getattr(find_result, "text", None)
+                if text is None:
+                    return default
+                return text.strip()
+            except Exception:
+                return default
 
-            # access each hotel information
-            for hotel in hotel_divs:
-                hotel_name = hotel.find('div', class_="b87c397a13 a3e0b4ffd1").text.strip()
+        # These classnames are brittle and may change; we handle "not found" gracefully.
+        name_el = hotel.find("div", class_="b87c397a13 a3e0b4ffd1")
+        location_el = hotel.find("span", class_="d823fbbeed f9b3563dd4")
+        price_el = hotel.find("span", class_="b87c397a13 f2f358d1de ab607752a2")
+        review_container = hotel.find("div", class_="fff1944c52 fb14de7f14 eaa8455879")
+        rating_el = hotel.find("div", class_="f63b14ab7a f546354b44 becbee2f63")
+        score_el = hotel.find("div", class_="f63b14ab7a dff2e52086")
+        link_el = hotel.find("a", href=True)
 
-                hotel_location = hotel.find('span',class_="d823fbbeed f9b3563dd4").text.strip()
+        hotel_name = safe_text(name_el)
+        hotel_location = safe_text(location_el)
+        price_raw = safe_text(price_el)
+        price = price_raw.replace("NZD ", "") if price_raw else ""
 
-                # price
-                price = hotel.find('span',class_="b87c397a13 f2f358d1de ab607752a2").text.strip().replace('NZD ','')
-                # review
-                hotel_review = hotel.find('div',class_="fff1944c52 fb14de7f14 eaa8455879")
-                # rating and score
-                hotel_rating = hotel.find('div',class_="f63b14ab7a f546354b44 becbee2f63")
-                hotel_score = hotel.find('div',class_="f63b14ab7a dff2e52086")
-                if hotel_review:
-                    # This code only runs if there was review
-                    review = hotel_review.text.strip()
-                    rating = hotel_rating.text.strip()
-                    score = hotel_score.text.strip()
-                else:
-                    # This code runs if the hotel is new and have no review yet
-                    rating = "New to Booking.com" 
-                    score = "New to Booking.com"
+        review = safe_text(review_container, default="No reviews yet")
+        rating = safe_text(rating_el, default="New to Booking.com")
+        score = safe_text(score_el, default="New to Booking.com")
+        link = link_el.get("href") if link_el and link_el.has_attr("href") else ""
 
-                # getting the link
-                link = hotel.find('a', href = True).get('href')
+        # Skip completely empty rows
+        if not any([hotel_name, hotel_location, price, rating, score, review, link]):
+            continue
 
-                # record the information to the file
-                writer.writerow([hotel_name, hotel_location, price, rating, score, review, link])
-    else:
-        print(f"Connection failed!{res.status_code}")
-    
-# if using this script directly then the code below will be executed
-### The code below is allow user to run directly but also allow others to import it as a module into other scripts
-### if run directly, Python automatically sets the __name__ variable for that script to the special value __main__.
-if __name__=='__main__':## to compare if __name__ = __main__, which mean checking if the scripts is run directly
-    # get the url and file name from users
+        rows.append(
+            {
+                "Hotel Name": hotel_name,
+                "Location": hotel_location,
+                "Price": price,
+                "Rating": rating,
+                "Score": score,
+                "Review": review,
+                "Link": link,
+            }
+        )
 
+    return rows
+
+
+def save_to_csv(rows: List[Dict[str, str]], file_name: str) -> None:
+    """Save parsed rows into a CSV file with the given base file name (no extension)."""
+    with open(f"{file_name}.csv", "w", newline="", encoding="utf-8") as file_csv:
+        writer = csv.DictWriter(
+            file_csv,
+            fieldnames=[
+                "Hotel Name",
+                "Location",
+                "Price",
+                "Rating",
+                "Score",
+                "Review",
+                "Link",
+            ],
+        )
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+
+
+def web_scraper(web_url: str, file_name: str) -> int:
+    """High-level scraper: fetch, parse, and write to CSV. Returns row count."""
+    print("Hi welcome to the show!\nStart now!")
+    time.sleep(1)
+
+    html = fetch_html(web_url)
+    rows = parse_hotels(html)
+    save_to_csv(rows, file_name)
+
+    print(f"Saved {len(rows)} rows to {file_name}.csv")
+    return len(rows)
+
+
+if __name__ == "__main__":
     web_url = input("Please enter URL: ")
     file_name = input("please enter the stored file's name: ")
-        
-    # calling the function
-    web_scraper(web_url, file_name)
+    try:
+        count = web_scraper(web_url, file_name)
+        print(f"Completed. {count} records exported.")
+    except requests.HTTPError as http_err:
+        print(f"Connection failed! HTTP error: {http_err}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
