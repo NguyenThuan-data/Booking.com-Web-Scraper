@@ -1,6 +1,12 @@
 # Booking.com Web Scraper
 
-Scrape hotel search results from Booking.com and export them to CSV for easy comparison. Built with Python and BeautifulSoup.
+## Motivation:
+
+My friend who is secretary of a Vietnamese club spent a lot of time to read and pick out all accomodation's information for the club retreat. So I made a Scrape hotel search results from Booking.com and export them to CSV for easy comparison. Built with Python and BeautifulSoup.
+
+## Result and Opportunity:
+
+Now she could use it for any time that the the club go on retreat, reduce time and effort. This also could play as a extract tool for anyone in anytime want to retrieve a accomodation info faster, in order to get fresh and new data everytime.
 
 ---
 
