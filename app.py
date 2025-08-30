@@ -147,7 +147,7 @@ PREVIEW_HTML = """
           <div class=\"url\">{{ url }}</div>
         </div>
         <div class=\"row\">
-          <a class=\"link button\" href=\"{{ url }}\" target=\"_blank\" rel=\"noopener noreferrer\">Open on Booking.com</a>
+          <a class=\"link button\" href=\"{{ url }}\" target=\"_blank\" rel=\"noopener noreferrer\"><span style=\"color:#000\">Open on Booking.com</span></a>
           <form method=\"post\" action=\"/scrape\">
             <input type=\"hidden\" name=\"url\" value=\"{{ url }}\" />
             <input type=\"hidden\" name=\"filename\" value=\"{{ filename }}\" />
