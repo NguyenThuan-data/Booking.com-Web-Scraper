@@ -134,7 +134,7 @@ PREVIEW_HTML = """
       .footer { margin-top: 20px; font-size: 12px; color: var(--muted); }
       .url { word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background:#0d2236; border:1px solid #214462; border-radius:10px; padding:10px 12px; }
       .row { display:flex; gap:12px; flex-wrap:wrap; }
-      .link { color: var(--accent); text-decoration: none; }
+      .link { color: inherit; text-decoration: none; }
     </style>
   </head>
   <body>
