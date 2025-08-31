@@ -14,20 +14,7 @@ I build this app for my friend, a secretary of VAUSA, who cost a lot of time to 
 
 ---
 
-## 🌐 Live App
-Open in your browser (no setup needed):
-
-https://f373210a41b74675b9df2ff9f27d9185-3d2c1b69-84bf-4fda-8b95-a55470.fly.dev/
-
----
-
 ## 🚀 Getting Started
-
-### Prerequisites
-- Python 3.10+
-- pip
-- Git (optional, for cloning)
-
 
 ### Prerequisites
 - Python 3.10+
