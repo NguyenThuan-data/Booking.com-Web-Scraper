@@ -1,113 +1,100 @@
 # Booking.com Web Scraper
 
-
-## Motivation:
-
-My friend who is secretary of a Vietnamese club spent a lot of time to read and pick out all accomodation's information for the club retreat. So I made a Scrape hotel search results from Booking.com and export them to CSV for easy comparison. Built with Python and BeautifulSoup.
-
-## Result and Opportunity:
-
-Now she could use it for any time that the the club go on retreat, reduce time and effort. This also could play as a extract tool for anyone in anytime want to retrieve a accomodation info faster, in order to get fresh and new data everytime.
-Scrape hotel search results from Booking.com and export them to CSV for easy comparison. Built with Python and BeautifulSoup.
-I build this app for my friend, a secretary of VAUSA, who cost a lot of time to check for accomodation for the club retreat
-
+> A small tool I built for a real user — the secretary of a Vietnamese university club (VAUSA) who spent hours comparing accommodation options for club retreats.
 
 ---
 
-## 🚀 Getting Started
+## The challenge
+
+- **User pain:** Manual copy-paste from Booking.com search results for every retreat planning cycle.
+- **Technical:** Booking.com HTML changes often; scraping requires maintenance and respectful use.
+- **Scope:** Export structured hotel data (name, location, price, rating, link) to CSV for side-by-side comparison.
+
+## What I learned
+
+- Building for a **named user with a named workflow** beats generic "scraper tutorials."
+- A simple Flask UI helps non-technical friends more than a CLI alone.
+- Scrapers are **liability projects** — document breakage honestly and don't oversell reliability.
+
+## How this leveled me up
+
+| | |
+|---|---|
+| **Before** | I consumed web data in notebooks only |
+| **After** | I shipped a small product someone else actually used |
+| **Unlocked next** | Plugin-based crawlers (see [Global Job Intelligence System](https://github.com/NguyenThuan-data/Global-Job-Intelligence-System)) |
+
+---
+
+## Getting Started
 
 ### Prerequisites
+
 - Python 3.10+
 - pip
-- Git (optional, for cloning)
-
 
 ### Installation
-1. Clone the repository
-   ```sh
-   git clone https://github.com/NguyenThuan-data/Booking.com-Web-Scraper.git
-   ```
-2. Change into the project directory
-   ```sh
-   cd "Booking.com-Web-Scraper"
-   ```
-3. (Optional) Create and activate a virtual environment
-   - macOS/Linux:
-     ```sh
-     python3 -m venv .venv && source .venv/bin/activate
-     ```
-   - Windows (PowerShell):
-     ```powershell
-     py -m venv .venv; .venv\Scripts\Activate.ps1
-     ```
-4. Install dependencies
-   ```sh
-   pip install -r requirements.txt
-   ```
+
+```bash
+git clone https://github.com/NguyenThuan-data/Booking.com-Web-Scraper.git
+cd Booking.com-Web-Scraper
+pip install -r requirements.txt
+```
+
+Optional virtual environment (Windows PowerShell):
+
+```powershell
+py -m venv .venv; .venv\Scripts\Activate.ps1
+```
 
 ---
 
-## 🔧 Usage
-You can use this project in three ways: Web UI, CLI, or as a Python module.
+## Usage
 
 ### 1) Web UI (Flask)
-Run the web app and use a browser to download a CSV.
-```sh
+
+```bash
 python app.py
 ```
-Then open http://localhost:3000 and:
-- Paste a Booking.com search URL (e.g., a page listing hotels for a destination/date range)
-- Enter a filename (without .csv)
-- Click “Scrape & Download CSV”
 
+Open `http://localhost:3000`, paste a Booking.com **search results** URL, enter a filename, and download CSV.
 
-Or use the hosted link above.
+### 2) Command line (interactive)
 
-
-### 2) Command Line (interactive)
-Run the script and follow the prompts.
-```sh
+```bash
 python web_scrape.py
 ```
-You will be asked for:
-- URL: a Booking.com search results page URL
-- File name: base name for the CSV
 
-The CSV (e.g., my-hotels.csv) will be saved in the current directory.
+Follow prompts for URL and output filename.
 
-### 3) As a Python module
-Use functions directly in your own code.
+### 3) Python module
+
 ```python
-from web_scrape import web_scraper, fetch_html, parse_hotels
+from web_scrape import web_scraper
 
-# High-level: fetch, parse, and write CSV. Returns number of rows.
 row_count = web_scraper(
     "https://www.booking.com/searchresults.html?ss=auckland",
     "my-hotels",
 )
 print(f"Exported {row_count} rows.")
-
-# Lower-level: fetch and parse without writing a file
-html = fetch_html("https://www.booking.com/searchresults.html?ss=auckland")
-rows = parse_hotels(html)
-# rows is a list of dicts with keys: Hotel Name, Location, Price, Rating, Score, Review, Link
 ```
 
 ---
 
-## 🗂️ Output
-- A CSV file is created with columns: Hotel Name, Location, Price, Rating, Score, Review, Link.
-- File is saved as <filename>.csv in the current directory.
+## Output
+
+CSV columns: **Hotel Name**, **Location**, **Price**, **Rating**, **Score**, **Review**, **Link**.
 
 ---
 
-## ❗ Notes & Troubleshooting
-- Booking.com may change its HTML structure; scraping may need maintenance.
-- If requests fail with HTTP errors, try again later or adjust headers/network. Basic browser-like headers are already included.
-- Ensure lxml is installed (installed via requirements.txt) for faster/more reliable parsing.
-- Use responsibly and review the website’s terms of service before scraping.
+## Honest notes
+
+- **May break without warning** when Booking.com changes page structure — this is expected for scrapers.
+- Review Booking.com's terms of service; use responsibly and for legitimate personal/club planning only.
+- Not recommended as a primary portfolio pin unless you add a fresh demo recording; better as a "real user story" supporting project.
 
 ---
 
-## 📦 Tech Stack
-- Python, Flask, requests, BeautifulSoup, lxml
+## Tech stack
+
+Python · Flask · requests · BeautifulSoup · lxml
